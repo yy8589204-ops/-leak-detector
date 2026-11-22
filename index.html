@@ -1,429 +1,656 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>كاشف تسرب الإيرادات</title>
-  <style>
-    :root {
-      --bg: #f4f6f9;
-      --card: #ffffff;
-      --primary: #0f766e;
-      --primary-dark: #115e59;
-      --danger: #dc2626;
-      --danger-bg: #fef2f2;
-      --warning: #d97706;
-      --warning-bg: #fffbeb;
-      --ok: #15803d;
-      --ok-bg: #f0fdf4;
-      --text: #1e293b;
-      --muted: #64748b;
-      --border: #e2e8f0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
-    }
+<meta name="theme-color" content="#075e54">
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      padding: 16px;
-      line-height: 1.5;
-    }
+<title>كاشف تسرب الإيرادات</title>
 
-    .container {
-      max-width: 780px;
-      margin: 0 auto;
+<style>
+
+* {
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    margin: 0;
+    background: #f1f4f8;
+    color: #172b3a;
+    transition: .3s;
+}
+
+body.dark {
+    background: #101b2a;
+    color: white;
+}
+
+button, input, select {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+}
+
+button {
+    cursor: pointer;
+    border: none;
+    background: #087f70;
+    color: white;
+}
+
+button:hover {
+    opacity: .85;
+}
+
+/* شاشة البداية */
+
+#intro {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: linear-gradient(135deg,#061b30,#087f70);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    flex-direction: column;
+}
+
+.logo {
+    font-size: 65px;
+    animation: pulse 1.5s infinite;
+}
+
+#intro h1 {
+    font-size: 27px;
+    animation: fade 2s;
+}
+
+#intro p {
+    color: #d6e9e5;
+}
+
+#intro button {
+    margin-top: 25px;
+    background: white;
+    color: #075e54;
+}
+
+@keyframes pulse {
+    50% {transform: scale(1.15);}
+}
+
+@keyframes fade {
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+
+/* الهيدر */
+
+header {
+    background: #075e54;
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+header h2 {
+    margin: 0;
+}
+
+.container {
+    padding: 15px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* البطاقات */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    gap: 12px;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 3px 12px #0000000c;
+}
+
+.dark .card {
+    background: #1d2c3e;
+    color: white;
+}
+
+.card h4 {
+    color: #778899;
+}
+
+.number {
+    font-size: 25px;
+    font-weight: bold;
+    color: #087f70;
+}
+
+.loss {
+    color: #e53935;
+}
+
+.section {
+    margin-top: 20px;
+}
+
+.section h3 {
+    color: #087f70;
+}
+
+.form {
+    display: grid;
+    gap: 10px;
+}
+
+input, select {
+    width: 100%;
+    background: white;
+}
+
+.dark input, .dark select {
+    background: #24364a;
+    color: white;
+    border-color: #43566b;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 13px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+}
+
+.table-box {
+    overflow-x: auto;
+}
+
+nav {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 12px 0;
+}
+
+nav button {
+    white-space: nowrap;
+}
+
+footer {
+    text-align: center;
+    padding: 25px;
+    color: gray;
+}
+
+@media(max-width:600px) {
+    .cards {
+        grid-template-columns: 1fr 1fr;
     }
 
     header {
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      color: #fff;
-      padding: 20px;
-      border-radius: 14px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.18);
+        flex-direction: column;
     }
 
-    header h1 {
-      font-size: 1.4rem;
-      margin-bottom: 4px;
+    .number {
+        font-size: 20px;
     }
+}
 
-    header p {
-      font-size: 0.9rem;
-      opacity: 0.92;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
-    }
-
-    .card h2 {
-      font-size: 1.05rem;
-      margin-bottom: 12px;
-      color: var(--primary-dark);
-    }
-
-    .grid-form {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-
-    @media (min-width: 600px) {
-      .grid-form {
-        grid-template-columns: 2fr 1fr 1fr;
-      }
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-
-    input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font-size: 0.95rem;
-      color: var(--text);
-    }
-
-    input:focus {
-      outline: none;
-      border-color: var(--primary);
-    }
-
-    .actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 0.92rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-    }
-
-    .btn-primary:hover {
-      background: var(--primary-dark);
-    }
-
-    .btn-secondary {
-      background: #e2e8f0;
-      color: var(--text);
-    }
-
-    .btn-danger-sm {
-      background: var(--danger-bg);
-      color: var(--danger);
-      padding: 6px 10px;
-      font-size: 0.8rem;
-    }
-
-    .summary {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-    }
-
-    @media (min-width: 600px) {
-      .summary {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-
-    .stat {
-      background: #f8fafc;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
-    }
-
-    .stat .label {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .stat .value {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-top: 4px;
-    }
-
-    .leak-val {
-      color: var(--danger);
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-
-    th, td {
-      padding: 10px 8px;
-      border-bottom: 1px solid var(--border);
-      text-align: right;
-    }
-
-    th {
-      color: var(--muted);
-      font-size: 0.82rem;
-      background: #f8fafc;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 3px 8px;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      font-weight: 700;
-    }
-
-    .badge-high {
-      background: var(--danger-bg);
-      color: var(--danger);
-    }
-
-    .badge-mid {
-      background: var(--warning-bg);
-      color: var(--warning);
-    }
-
-    .badge-ok {
-      background: var(--ok-bg);
-      color: var(--ok);
-    }
-
-    .empty {
-      text-align: center;
-      color: var(--muted);
-      padding: 20px;
-      font-size: 0.9rem;
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-    }
-  </style>
+</style>
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <h1>كاشف تسرب الإيرادات</h1>
-      <p>مقارنة الإيرادات المتوقعة بالمحصلة وتحديد الفجوات ونسب التسرب بسرعة</p>
-    </header>
 
-    <section class="card">
-      <h2>إضافة بند إيراد للمقارنة</h2>
-      <form id="leakForm">
-        <div class="grid-form">
-          <div>
-            <label for="itemName">اسم المصدر أو البند</label>
-            <input type="text" id="itemName" placeholder="مثال: مبيعات الفرع الأول" required />
-          </div>
-          <div>
-            <label for="expectedAmt">الإيراد المتوقع</label>
-            <input type="number" id="expectedAmt" step="any" min="0" placeholder="0" required />
-          </div>
-          <div>
-            <label for="actualAmt">الإيراد المحصل فعلياً</label>
-            <input type="number" id="actualAmt" step="any" min="0" placeholder="0" required />
-          </div>
-        </div>
-        <div class="actions">
-          <button type="submit" class="btn-primary">+ إضافة البند</button>
-          <button type="button" id="sampleBtn" class="btn-secondary">تجربة بيانات جاهزة</button>
-          <button type="button" id="clearBtn" class="btn-secondary">مسح الكل</button>
-        </div>
-      </form>
-    </section>
+<!-- شاشة البداية -->
 
-    <section class="card">
-      <h2>الملخص العام</h2>
-      <div class="summary">
-        <div class="stat">
-          <div class="label">إجمالي المتوقع</div>
-          <div class="value" id="totalExpected">0</div>
-        </div>
-        <div class="stat">
-          <div class="label">إجمالي المحصل</div>
-          <div class="value" id="totalActual">0</div>
-        </div>
-        <div class="stat">
-          <div class="label">قيمة التسرب</div>
-          <div class="value leak-val" id="totalLeak">0</div>
-        </div>
-        <div class="stat">
-          <div class="label">نسبة التسرب</div>
-          <div class="value leak-val" id="leakRate">0%</div>
-        </div>
-      </div>
-    </section>
+<div id="intro">
 
-    <section class="card">
-      <h2>تفاصيل البنود وحالة التسرب</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>البند</th>
-              <th>المتوقع</th>
-              <th>المحصل</th>
-              <th>الفرق / التسرب</th>
-              <th>النسبة</th>
-              <th>الحالة</th>
-              <th>حذف</th>
-            </tr>
-          </thead>
-          <tbody id="rowsBody">
-            <tr>
-              <td colspan="7" class="empty">لا توجد بنود بعد. أضف بنداً أو جرّب البيانات الجاهزة.</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </div>
+    <div class="logo">🔍</div>
 
-  <script>
-    const STORAGE_KEY = "kashif_tasarub_items_v1";
-    let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    <h1>كاشف تسرّب الإيرادات</h1>
 
-    const form = document.getElementById("leakForm");
-    const itemName = document.getElementById("itemName");
-    const expectedAmt = document.getElementById("expectedAmt");
-    const actualAmt = document.getElementById("actualAmt");
-    const rowsBody = document.getElementById("rowsBody");
+    <h3>Revenue Leakage Detector</h3>
 
-    function fmt(num) {
-      return Number(num).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    <p>اكتشف التسربات، احمِ إيراداتك، وطوّر أعمالك.</p>
+
+    <button onclick="startApp()">ابدأ الآن ←</button>
+
+</div>
+
+
+<header>
+
+    <h2>🔍 كاشف تسرب الإيرادات</h2>
+
+    <div>
+        <button onclick="toggleTheme()">🌙 / ☀️</button>
+    </div>
+
+</header>
+
+
+<div class="container">
+
+    <nav>
+        <button onclick="go('dashboard')">🏠 الرئيسية</button>
+        <button onclick="go('analysis')">🔍 كشف التسربات</button>
+        <button onclick="go('assistant')">🤖 المساعد الذكي</button>
+        <button onclick="go('settings')">⚙️ الإعدادات</button>
+    </nav>
+
+
+    <!-- لوحة التحكم -->
+
+    <div id="dashboard">
+
+        <h2>مرحباً بك في لوحة التحكم</h2>
+
+        <div class="section">
+
+            <h3>إضافة بيانات الإيرادات</h3>
+
+            <div class="card">
+
+                <div class="form">
+
+                    <input id="name"
+                    placeholder="اسم البند">
+
+                    <input id="expected"
+                    type="number"
+                    placeholder="الإيراد المتوقع">
+
+                    <input id="actual"
+                    type="number"
+                    placeholder="الإيراد المحصل فعلياً">
+
+                    <button onclick="addItem()">
+                    + إضافة البند
+                    </button>
+
+                    <button onclick="demoData()">
+                    تجربة بيانات جاهزة
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- الملخص -->
+
+        <div class="section">
+
+            <h3>الملخص العام</h3>
+
+            <div class="cards">
+
+                <div class="card">
+                    <h4>إجمالي المتوقع</h4>
+                    <div class="number" id="totalExpected">0</div>
+                </div>
+
+                <div class="card">
+                    <h4>إجمالي المحصل</h4>
+                    <div class="number" id="totalActual">0</div>
+                </div>
+
+                <div class="card">
+                    <h4>قيمة التسرب</h4>
+                    <div class="number loss" id="totalLoss">0</div>
+                </div>
+
+                <div class="card">
+                    <h4>نسبة التسرب</h4>
+                    <div class="number loss" id="lossRate">0%</div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- الجدول -->
+
+        <div class="section">
+
+            <div class="card">
+
+                <h3>تفاصيل البنود وحالة التسرب</h3>
+
+                <div class="table-box">
+
+                    <table>
+
+                        <thead>
+                            <tr>
+                                <th>البند</th>
+                                <th>المتوقع</th>
+                                <th>المحصل</th>
+                                <th>التسرب</th>
+                                <th>الحالة</th>
+                                <th>حذف</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="items"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- كشف التسربات -->
+
+    <div id="analysis" style="display:none">
+
+        <div class="card">
+
+            <h2>🔍 تحليل التسربات المالية</h2>
+
+            <p>يقوم التطبيق بمقارنة الإيرادات المتوقعة بالمبالغ المحصلة.</p>
+
+            <div id="analysisResult">
+                أضيفي بياناتك لبدء التحليل.
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- المساعد الذكي -->
+
+    <div id="assistant" style="display:none">
+
+        <div class="card">
+
+            <h2>🤖 المساعد المالي الذكي</h2>
+
+            <p>اسأل عن إيراداتك وخسائرك.</p>
+
+            <input id="question"
+            placeholder="اكتب سؤالك هنا...">
+
+            <button onclick="askAI()">
+            إرسال السؤال
+            </button>
+
+            <div id="answer"></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- الإعدادات -->
+
+    <div id="settings" style="display:none">
+
+        <div class="card">
+
+            <h2>⚙️ الإعدادات</h2>
+
+            <label>اللغة</label>
+
+            <select id="language" onchange="changeLanguage()">
+                <option value="ar">العربية</option>
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+
+            <br><br>
+
+            <label>العملة الأساسية</label>
+
+            <select id="currency" onchange="update()">
+                <option value="DZD">الدينار الجزائري DZD</option>
+                <option value="EUR">اليورو EUR</option>
+                <option value="USD">الدولار USD</option>
+                <option value="GBP">الجنيه الإسترليني GBP</option>
+                <option value="SAR">الريال السعودي SAR</option>
+                <option value="AED">الدرهم الإماراتي AED</option>
+                <option value="MAD">الدرهم المغربي MAD</option>
+                <option value="TND">الدينار التونسي TND</option>
+            </select>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<footer>
+    كاشف تسرب الإيرادات © 2026
+</footer>
+
+
+<script>
+
+let data = JSON.parse(localStorage.getItem("revenueData") || "[]");
+
+function startApp() {
+    document.getElementById("intro").style.display = "none";
+}
+
+setTimeout(startApp, 4000);
+
+
+function toggleTheme() {
+
+    document.body.classList.toggle("dark");
+
+    localStorage.setItem(
+        "theme",
+        document.body.classList.contains("dark") ? "dark" : "light"
+    );
+
+}
+
+if(localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+}
+
+
+function go(page) {
+
+    ["dashboard","analysis","assistant","settings"]
+    .forEach(id => {
+        document.getElementById(id).style.display =
+        id === page ? "block" : "none";
+    });
+
+    if(page === "analysis") {
+        analyze();
     }
 
-    function save() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-    }
+}
 
-    function render() {
-      let sumExp = 0;
-      let sumAct = 0;
 
-      items.forEach((it) => {
-        sumExp += it.expected;
-        sumAct += it.actual;
-      });
+function addItem() {
 
-      const totalLeak = Math.max(0, sumExp - sumAct);
-      const leakPct = sumExp > 0 ? (totalLeak / sumExp) * 100 : 0;
+    let name = document.getElementById("name").value;
 
-      document.getElementById("totalExpected").textContent = fmt(sumExp);
-      document.getElementById("totalActual").textContent = fmt(sumAct);
-      document.getElementById("totalLeak").textContent = fmt(totalLeak);
-      document.getElementById("leakRate").textContent = leakPct.toFixed(1) + "%";
+    let expected = Number(document.getElementById("expected").value);
 
-      if (items.length === 0) {
-        rowsBody.innerHTML = `<tr><td colspan="7" class="empty">لا توجد بنود بعد. أضف بنداً أو جرّب البيانات الجاهزة.</td></tr>`;
+    let actual = Number(document.getElementById("actual").value);
+
+    if(!name || expected < 0 || actual < 0 ||
+       document.getElementById("expected").value === "" ||
+       document.getElementById("actual").value === "") {
+        alert("يرجى إدخال بيانات صحيحة");
         return;
-      }
-
-      rowsBody.innerHTML = items
-        .map((it, idx) => {
-          const diff = it.expected - it.actual;
-          const pct = it.expected > 0 ? (diff / it.expected) * 100 : 0;
-
-          let badge = `<span class="badge badge-ok">سليم</span>`;
-          if (diff > 0 && pct >= 15) {
-            badge = `<span class="badge badge-high">تسرب مرتفع</span>`;
-          } else if (diff > 0) {
-            badge = `<span class="badge badge-mid">تسرب متوسط</span>`;
-          }
-
-          return `
-            <tr>
-              <td>${escapeHtml(it.name)}</td>
-              <td>${fmt(it.expected)}</td>
-              <td>${fmt(it.actual)}</td>
-              <td class="leak-val">${diff > 0 ? fmt(diff) : "0"}</td>
-              <td>${diff > 0 ? pct.toFixed(1) + "%" : "0%"}</td>
-              <td>${badge}</td>
-              <td><button type="button" class="btn-danger-sm" onclick="removeItem(${idx})">حذف</button></td>
-            </tr>
-          `;
-        })
-        .join("");
     }
 
-    function escapeHtml(str) {
-      return str
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;");
+    data.push({name, expected, actual});
+
+    save();
+
+    document.getElementById("name").value = "";
+    document.getElementById("expected").value = "";
+    document.getElementById("actual").value = "";
+
+}
+
+
+function save() {
+
+    localStorage.setItem("revenueData",JSON.stringify(data));
+
+    update();
+
+}
+
+
+function update() {
+
+    let expected = 0;
+    let actual = 0;
+
+    let html = "";
+
+    data.forEach((item,index) => {
+
+        expected += item.expected;
+        actual += item.actual;
+
+        let loss = Math.max(0,item.expected-item.actual);
+
+        let status = loss > 0 ? "⚠️ فرق يحتاج مراجعة" : "✓ متوازن";
+
+        html += `
+        <tr>
+        <td>${escapeHTML(item.name)}</td>
+        <td>${item.expected}</td>
+        <td>${item.actual}</td>
+        <td class="loss">${loss}</td>
+        <td>${status}</td>
+        <td><button onclick="removeItem(${index})">حذف</button></td>
+        </tr>`;
+
+    });
+
+    document.getElementById("items").innerHTML =
+    html || "<tr><td colspan='6'>لا توجد بيانات بعد.</td></tr>";
+
+    let loss = Math.max(0,expected-actual);
+
+    document.getElementById("totalExpected").innerText = expected;
+    document.getElementById("totalActual").innerText = actual;
+    document.getElementById("totalLoss").innerText = loss;
+
+    document.getElementById("lossRate").innerText =
+    (expected > 0 ? loss/expected*100 : 0).toFixed(1) + "%";
+
+}
+
+
+function removeItem(index) {
+
+    if(confirm("هل تريد حذف هذا البند؟")) {
+
+        data.splice(index,1);
+
+        save();
+
     }
 
-    window.removeItem = function (idx) {
-      items.splice(idx, 1);
-      save();
-      render();
-    };
+}
 
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = itemName.value.trim();
-      const expected = parseFloat(expectedAmt.value);
-      const actual = parseFloat(actualAmt.value);
 
-      if (!name || isNaN(expected) || isNaN(actual)) return;
+function demoData() {
 
-      items.push({ name, expected, actual });
-      save();
-      render();
-      form.reset();
-      itemName.focus();
-    });
+    data = [
+        {name:"المبيعات",expected:100000,actual:85000},
+        {name:"الخدمات",expected:50000,actual:45000},
+        {name:"الاشتراكات",expected:30000,actual:30000}
+    ];
 
-    document.getElementById("sampleBtn").addEventListener("click", () => {
-      items = [
-        { name: "المبيعات اليومية", expected: 50000, actual: 42000 },
-        { name: "تحصيل الفواتير", expected: 30000, actual: 28500 },
-        { name: "الخدمات الإضافية", expected: 15000, actual: 15000 }
-      ];
-      save();
-      render();
-    });
+    save();
 
-    document.getElementById("clearBtn").addEventListener("click", () => {
-      items = [];
-      save();
-      render();
-    });
+}
 
-    render();
-  </script>
+
+function analyze() {
+
+    let expected = data.reduce((s,x)=>s+x.expected,0);
+
+    let actual = data.reduce((s,x)=>s+x.actual,0);
+
+    let loss = Math.max(0,expected-actual);
+
+    document.getElementById("analysisResult").innerHTML =
+    `
+    <h3>نتيجة التحليل</h3>
+    <p>الإيرادات المتوقعة: ${expected}</p>
+    <p>الإيرادات المحصلة: ${actual}</p>
+    <p class="loss">الفرق المالي: ${loss}</p>
+    <p>هذه نتيجة مقارنة حسابية أولية وليست إثباتاً لوجود تسرب مالي.</p>
+    `;
+
+}
+
+
+function askAI() {
+
+    document.getElementById("answer").innerHTML =
+    "المساعد الذكي يحتاج إلى ربط خدمة ذكاء اصطناعي API حتى يتمكن من الإجابة عن أسئلتك وتحليل بياناتك.";
+
+}
+
+
+function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, c => ({
+        "&":"&amp;",
+        "<":"&lt;",
+        ">":"&gt;",
+        '"':"&quot;",
+        "'":"&#39;"
+    })[c]);
+}
+
+
+function changeLanguage() {
+
+    alert("تغيير اللغة الكامل يحتاج إلى إضافة نظام ترجمة لجميع عناصر التطبيق.");
+
+}
+
+
+update();
+
+</script>
+
 </body>
 </html>
