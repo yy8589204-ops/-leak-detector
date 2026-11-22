@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>كاشف تسرب الإيرادات</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --primary: #0f766e;
+      --primary-dark: #115e59;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --warning: #d97706;
+      --warning-bg: #fffbeb;
+      --ok: #15803d;
+      --ok-bg: #f0fdf4;
+      --text: #1e293b;
+      --muted: #64748b;
+      --border: #e2e8f0;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(15, 118, 110, 0.18);
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      margin-bottom: 4px;
+    }
+
+    header p {
+      font-size: 0.9rem;
+      opacity: 0.92;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    }
+
+    .card h2 {
+      font-size: 1.05rem;
+      margin-bottom: 12px;
+      color: var(--primary-dark);
+    }
+
+    .grid-form {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    @media (min-width: 600px) {
+      .grid-form {
+        grid-template-columns: 2fr 1fr 1fr;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-secondary {
+      background: #e2e8f0;
+      color: var(--text);
+    }
+
+    .btn-danger-sm {
+      background: var(--danger-bg);
+      color: var(--danger);
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    @media (min-width: 600px) {
+      .summary {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .stat {
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .stat .label {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+
+    .stat .value {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+
+    .leak-val {
+      color: var(--danger);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.82rem;
+      background: #f8fafc;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+    }
+
+    .badge-high {
+      background: var(--danger-bg);
+      color: var(--danger);
+    }
+
+    .badge-mid {
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .badge-ok {
+      background: var(--ok-bg);
+      color: var(--ok);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+      font-size: 0.9rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>كاشف تسرب الإيرادات</h1>
+      <p>مقارنة الإيرادات المتوقعة بالمحصلة وتحديد الفجوات ونسب التسرب بسرعة</p>
+    </header>
+
+    <section class="card">
+      <h2>إضافة بند إيراد للمقارنة</h2>
+      <form id="leakForm">
+        <div class="grid-form">
+          <div>
+            <label for="itemName">اسم المصدر أو البند</label>
+            <input type="text" id="itemName" placeholder="مثال: مبيعات الفرع الأول" required />
+          </div>
+          <div>
+            <label for="expectedAmt">الإيراد المتوقع</label>
+            <input type="number" id="expectedAmt" step="any" min="0" placeholder="0" required />
+          </div>
+          <div>
+            <label for="actualAmt">الإيراد المحصل فعلياً</label>
+            <input type="number" id="actualAmt" step="any" min="0" placeholder="0" required />
+          </div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn-primary">+ إضافة البند</button>
+          <button type="button" id="sampleBtn" class="btn-secondary">تجربة بيانات جاهزة</button>
+          <button type="button" id="clearBtn" class="btn-secondary">مسح الكل</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>الملخص العام</h2>
+      <div class="summary">
+        <div class="stat">
+          <div class="label">إجمالي المتوقع</div>
+          <div class="value" id="totalExpected">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">إجمالي المحصل</div>
+          <div class="value" id="totalActual">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">قيمة التسرب</div>
+          <div class="value leak-val" id="totalLeak">0</div>
+        </div>
+        <div class="stat">
+          <div class="label">نسبة التسرب</div>
+          <div class="value leak-val" id="leakRate">0%</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>تفاصيل البنود وحالة التسرب</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>البند</th>
+              <th>المتوقع</th>
+              <th>المحصل</th>
+              <th>الفرق / التسرب</th>
+              <th>النسبة</th>
+              <th>الحالة</th>
+              <th>حذف</th>
+            </tr>
+          </thead>
+          <tbody id="rowsBody">
+            <tr>
+              <td colspan="7" class="empty">لا توجد بنود بعد. أضف بنداً أو جرّب البيانات الجاهزة.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "kashif_tasarub_items_v1";
+    let items = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+    const form = document.getElementById("leakForm");
+    const itemName = document.getElementById("itemName");
+    const expectedAmt = document.getElementById("expectedAmt");
+    const actualAmt = document.getElementById("actualAmt");
+    const rowsBody = document.getElementById("rowsBody");
+
+    function fmt(num) {
+      return Number(num).toLocaleString("en-US", { maximumFractionDigits: 2 });
+    }
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function render() {
+      let sumExp = 0;
+      let sumAct = 0;
+
+      items.forEach((it) => {
+        sumExp += it.expected;
+        sumAct += it.actual;
+      });
+
+      const totalLeak = Math.max(0, sumExp - sumAct);
+      const leakPct = sumExp > 0 ? (totalLeak / sumExp) * 100 : 0;
+
+      document.getElementById("totalExpected").textContent = fmt(sumExp);
+      document.getElementById("totalActual").textContent = fmt(sumAct);
+      document.getElementById("totalLeak").textContent = fmt(totalLeak);
+      document.getElementById("leakRate").textContent = leakPct.toFixed(1) + "%";
+
+      if (items.length === 0) {
+        rowsBody.innerHTML = `<tr><td colspan="7" class="empty">لا توجد بنود بعد. أضف بنداً أو جرّب البيانات الجاهزة.</td></tr>`;
+        return;
+      }
+
+      rowsBody.innerHTML = items
+        .map((it, idx) => {
+          const diff = it.expected - it.actual;
+          const pct = it.expected > 0 ? (diff / it.expected) * 100 : 0;
+
+          let badge = `<span class="badge badge-ok">سليم</span>`;
+          if (diff > 0 && pct >= 15) {
+            badge = `<span class="badge badge-high">تسرب مرتفع</span>`;
+          } else if (diff > 0) {
+            badge = `<span class="badge badge-mid">تسرب متوسط</span>`;
+          }
+
+          return `
+            <tr>
+              <td>${escapeHtml(it.name)}</td>
+              <td>${fmt(it.expected)}</td>
+              <td>${fmt(it.actual)}</td>
+              <td class="leak-val">${diff > 0 ? fmt(diff) : "0"}</td>
+              <td>${diff > 0 ? pct.toFixed(1) + "%" : "0%"}</td>
+              <td>${badge}</td>
+              <td><button type="button" class="btn-danger-sm" onclick="removeItem(${idx})">حذف</button></td>
+            </tr>
+          `;
+        })
+        .join("");
+    }
+
+    function escapeHtml(str) {
+      return str
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;");
+    }
+
+    window.removeItem = function (idx) {
+      items.splice(idx, 1);
+      save();
+      render();
+    };
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = itemName.value.trim();
+      const expected = parseFloat(expectedAmt.value);
+      const actual = parseFloat(actualAmt.value);
+
+      if (!name || isNaN(expected) || isNaN(actual)) return;
+
+      items.push({ name, expected, actual });
+      save();
+      render();
+      form.reset();
+      itemName.focus();
+    });
+
+    document.getElementById("sampleBtn").addEventListener("click", () => {
+      items = [
+        { name: "المبيعات اليومية", expected: 50000, actual: 42000 },
+        { name: "تحصيل الفواتير", expected: 30000, actual: 28500 },
+        { name: "الخدمات الإضافية", expected: 15000, actual: 15000 }
+      ];
+      save();
+      render();
+    });
+
+    document.getElementById("clearBtn").addEventListener("click", () => {
+      items = [];
+      save();
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
